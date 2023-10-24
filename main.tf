@@ -93,3 +93,28 @@ resource "aws_eip" "ovpn_elastic_ip" {
 output "summary" {
   value = "First SSH to the server and setup it: ssh openvpnas@${aws_eip.ovpn_elastic_ip.public_ip} . And then enter to the portal and configure users: https://${aws_eip.ovpn_elastic_ip.public_ip}/admin"
 }
+
+
+/*
+# you can also use a command line to create a new user and produce an ovpn file
+# and disable web ip (you can remove an ingress for 443 in sgs as well for that)
+
+cd /usr/local/openvpn_as/scripts
+sudo su
+
+username="<username>"
+password="<password>"
+
+# creating a new user
+./sacli --user ${username} --key "type" --value "user_connect" UserPropPut
+./sacli --user ${username} --new_pass ${password} SetLocalPassword
+
+# generating an ovpn file
+./sacli --prefer-tls-crypt-v2 --user ${username} GetUserlogin > /home/openvpnas/${username}.ovpn
+
+# disabling web ui
+./sacli --key "admin_ui.https.ip_address" --value lo ConfigPut
+./sacli start
+
+
+*/
