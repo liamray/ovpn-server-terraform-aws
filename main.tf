@@ -85,6 +85,11 @@ resource "aws_instance" "ovpn_server" {
   }
 }
 
+resource "aws_eip" "ovpn_elastic_ip" {
+  instance = aws_instance.ovpn_server.id
+}
+
+
 output "summary" {
-  value = "First SSH to the server and setup it: ssh openvpnas@${aws_instance.ovpn_server.public_ip} . And then enter to the portal and configure users: https://${aws_instance.ovpn_server.public_ip}/admin"
+  value = "First SSH to the server and setup it: ssh openvpnas@${aws_eip.ovpn_elastic_ip.public_ip} . And then enter to the portal and configure users: https://${aws_eip.ovpn_elastic_ip.public_ip}/admin"
 }
