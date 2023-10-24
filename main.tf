@@ -96,8 +96,8 @@ output "summary" {
 
 
 /*
-# you can also use a command line to create a new user and produce an ovpn file
-# and disable web ip (you can remove an ingress for 443 in sgs as well for that)
+# you can use a command line to create a new user and produce an ovpn file
+# and disable a web ui (you can also block a 443 and 943 ports in sgs as well to block a web ui)
 
 cd /usr/local/openvpn_as/scripts
 sudo su
