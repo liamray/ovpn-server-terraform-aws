@@ -1,4 +1,4 @@
-# Personal OpvnVPN server
+# Personal OpenVPN server
 
 ## TL;DR
 This terraform script spins up a personal VPN server in the AWS cloud.
