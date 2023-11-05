@@ -162,7 +162,7 @@ resource "aws_instance" "ovpn_server" {
   instance_type          = data.aws_ec2_instance_type_offering.instance_type.instance_type
   key_name               = aws_key_pair.my_kp.id
   vpc_security_group_ids = [aws_security_group.ovpn_sgs.id]
-  user_data              = file("${path.module}/user_data.sh")
+  user_data              = file("${path.module}/user-data.sh")
 
   iam_instance_profile = aws_iam_instance_profile.ovpn_instance_profile.name
 
