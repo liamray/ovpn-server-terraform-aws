@@ -1,5 +1,5 @@
 variable "region" {
-  default = "ca-central-1"
+  default = "us-east-1"
 }
 
 provider "aws" {
@@ -7,8 +7,9 @@ provider "aws" {
 }
 
 locals {
-  ovpn_remote_dir = "/home/ubuntu/ovpn-files"
-  ovpn_local_dir  = "${path.module}/output"
+  ovpn_remote_dir      = "/home/ubuntu/ovpn-files"
+  ovpn_local_dir       = "${path.module}/output"
+  ssh_private_key_file = "${local.ovpn_local_dir}/private-key"
 }
 
 # searching for the ubuntu ami
@@ -27,10 +28,15 @@ data "aws_ami" "ubuntu_ami" {
   }
 }
 
+resource "tls_private_key" "ssh_key_pair" {
+  algorithm = "RSA"
+  rsa_bits  = 4096
+}
+
 
 resource "aws_key_pair" "my_kp" {
-  key_name   = "my_kp"
-  public_key = file("~/.ssh/id_rsa.pub")
+  key_name   = "ovpn-key-pair"
+  public_key = tls_private_key.ssh_key_pair.public_key_openssh
 }
 
 data "aws_vpc" "default_vpc" {
@@ -186,7 +192,7 @@ resource "null_resource" "wait_for_aws_instance" {
   connection {
     type        = "ssh"
     user        = "ubuntu"
-    private_key = file("~/.ssh/id_rsa")
+    private_key = tls_private_key.ssh_key_pair.private_key_openssh
 
     host = aws_eip.ovpn_elastic_ip.public_ip
   }
@@ -205,14 +211,24 @@ resource "null_resource" "wait_for_aws_instance" {
     command = "mkdir -p '${local.ovpn_local_dir}'"
   }
 
+  # creating a private key file
+  provisioner "local-exec" {
+    command = "echo '${tls_private_key.ssh_key_pair.private_key_openssh}' > '${local.ssh_private_key_file}' && chmod 600 '${local.ssh_private_key_file}'"
+  }
+
   # copying files from the remote dir to the local dir
   provisioner "local-exec" {
-    command = "scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ~/.ssh/id_rsa ubuntu@${aws_eip.ovpn_elastic_ip.public_ip}:${local.ovpn_remote_dir}/* ${local.ovpn_local_dir}"
+    command = "scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ${local.ssh_private_key_file} ubuntu@${aws_eip.ovpn_elastic_ip.public_ip}:${local.ovpn_remote_dir}/* ${local.ovpn_local_dir}"
   }
 
   # deleting files in the remote dir
   provisioner "local-exec" {
-    command = "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ~/.ssh/id_rsa ubuntu@${aws_eip.ovpn_elastic_ip.public_ip} sudo rm ${local.ovpn_remote_dir}/*"
+    command = "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ${local.ssh_private_key_file} ubuntu@${aws_eip.ovpn_elastic_ip.public_ip} sudo rm ${local.ovpn_remote_dir}/*"
+  }
+
+  # deleting a private key file locally (you can all always use instance connect in the AWS console instead)
+  provisioner "local-exec" {
+    command = "rm '${local.ssh_private_key_file}'"
   }
 
   provisioner "remote-exec" {
@@ -225,14 +241,12 @@ resource "null_resource" "wait_for_aws_instance" {
 }
 
 output "summary" {
-  value = "The OVPN server is up and ready. The profile and credentials file are in the [${local.ovpn_local_dir}] directory. Enjoy ;-)"
+  value = "The OVPN server is up and ready. The profile and credentials files are in the [${local.ovpn_local_dir}] directory. Enjoy ;-)"
 }
 
 /*
-generate key-pair and use it instead of my key-pair
-  https://stackoverflow.com/questions/55745961/connection-issue-using-ssh-private-key
-  https://stackoverflow.com/questions/48567881/how-can-i-use-terraforms-file-provisioner-to-copy-from-my-local-machine-onto-a
-user_data supply env vars somehow
-test in all regions
-use launch template instead of aws_instance, set desired = min = max instance = 1
+2do:
+  user_data supply env vars somehow
+  use autoscaling groups with min, max, desired capacity = 1
+  tag all resources
 */
