@@ -50,7 +50,7 @@ resource "null_resource" "ovpn_setup" {
       "sudo rm ${local.ovpn_remote_dir}/*",
 
       # revoking ssh access to ovpn server
-      "aws ec2 revoke-security-group-ingress --group-name \"${aws_security_group.ovpn_sgs.name}\" --protocol tcp --port 22 --cidr 0.0.0.0/0"
+      "aws ec2 revoke-security-group-ingress --group-name \"${aws_security_group.ovpn_sgs.name}\" --protocol tcp --port 22 --cidr 0.0.0.0/0 --region=${var.region}"
     ]
   }
 }

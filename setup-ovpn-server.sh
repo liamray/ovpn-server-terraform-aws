@@ -15,10 +15,7 @@ sudo apt update -y
 sudo apt update
 
 # installing different stuff
-sudo apt install net-tools unzip ca-certificates wget gnupg -y
-sudo curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-sudo unzip -o awscliv2.zip
-sudo ./aws/install --update
+sudo apt install net-tools unzip ca-certificates wget gnupg awscli -y
 
 # installing open-server
 sudo wget https://as-repository.openvpn.net/as-repo-public.asc -qO /etc/apt/trusted.gpg.d/as-repository.asc

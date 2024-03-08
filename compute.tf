@@ -151,6 +151,9 @@ resource "aws_instance" "ovpn_server" {
   iam_instance_profile = aws_iam_instance_profile.ovpn_instance_profile.name
 
   tags = local.tags
+  metadata_options {
+    http_tokens = "optional"
+  }
 }
 
 # the permanent ip address
