@@ -69,7 +69,7 @@ export creds_file_path="${base_dir}/${creds_file_name}"
 
 # writing user creds to the file
 echo  "To connecto to the open vpn use a [${ovpn_file_name}] file" > "${creds_file_path}"
-echo  "You have to authenticate yourself with a [${user_name}] username and [${user_password}] password" >> "${creds_file_path}"
+echo  "You have to authenticate yourself with a [username=${user_name}] and [password=${user_password}]" >> "${creds_file_path}"
 chown ubuntu:ubuntu "${creds_file_path}"
 
 # creating user. the openvpn service still might be in progress, so trying to create a user multiple times
