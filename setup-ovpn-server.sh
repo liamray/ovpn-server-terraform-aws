@@ -7,7 +7,7 @@
 set -eu
 
 generate_random_password() {
-    tr -dc 'A-Za-z0-9!#$%&*+=?@|~' </dev/urandom | head -c 20  ; echo
+    tr -dc 'A-Za-z0-9!#$%&*+?@|~' </dev/urandom | head -c 20  ; echo
 }
 
 # apt
