@@ -36,7 +36,7 @@ This terraform script spins up the ec2 instance in the AWS cloud based on ubuntu
 * IAM role and policy
 * security group
 
-## The minimal IAM policy
+## The minimal IAM policy for terraform user
 
 ```
 {
